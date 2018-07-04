@@ -123,7 +123,7 @@ void main( )
     
     //float fft  = texelFetch( iChannel2, ivec2(.7,0), 0 ).x;
     vec4 tex = texture( iChannel0, uv );
-    float glow = tex.w*iGlow;//+fft*0.05;
+    float glow = -length(uv)*iGlow+tex.w*iGlow;//+fft*0.05;
     
     vec3 baseCol = vec3(s, cos(t*.4), -sin(t*.24))*.4+.6;
     vec3 col = baseCol*m;
