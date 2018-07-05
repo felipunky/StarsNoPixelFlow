@@ -19,6 +19,9 @@ float pulse = 10.0;
 float b_red = 0.0;
 float b_green = 0.0;
 float b_blue = 0.0;
+float density = 0.0;
+
+int procedural = 0;
 
 public void settings() 
 {
@@ -30,12 +33,14 @@ public void settings()
 
 public void setup() {
   
-  pushMatrix();
-  //translate( 1, -1 );
-  translate( width, -height );
   noise = loadImage("Noise.png");
-  popMatrix();
+  textureMode(IMAGE);
+  pushMatrix(); 
+  scale(1, -1); 
+  translate(0, -noise.height);
+  //image(noise, 0, 0); 
   textureWrap(Texture.REPEAT);
+  popMatrix();
   
   float x = width/height;
   
@@ -70,7 +75,6 @@ public void setup() {
     .setNumberOfTickMarks(10);
     ;  
     
-    
   Control.addSlider( "pulse" )
     .setPosition( x, 65 )
     .setRange( 0, 50 )
@@ -89,6 +93,17 @@ public void setup() {
   Control.addSlider( "b_blue" )
     .setPosition( x, 95 )
     .setRange( 0, 1 )
+    ; 
+    
+  Control.addSlider( "density" )
+    .setPosition( x, 105 )
+    .setRange( 0, 1 )
+    ;     
+    
+  Control.addButton( "procedural" )
+    .setValue( 0 )
+    .setPosition( x, 115 )
+    .setSize( 100, 10 )
     ;  
 
   bufA = loadShader("data/Test_BufA.frag");
@@ -111,6 +126,13 @@ void draw()
   bufA.set("iGlow", glow);
   bufA.set("iStars", number_of_stars);
   bufA.set("iPulse", pulse);
+  
+  if( keyPressed )
+  {
+  
+    bufA.set("iTime", 0);
+  
+  }
 
   shader(bufA);
   rect(0, 0, width, height);
@@ -128,6 +150,16 @@ void draw()
   shader.set("iBackGroundRed", b_red);
   shader.set("iBackGroundGreen", b_green);
   shader.set("iBackGroundBlue", b_blue);
+  shader.set("iDensity", density);
+  shader.set("iProcedural", procedural);
+  
+  if( keyPressed )
+  {
+  
+    shader.set("iTime", 0);
+  
+  }
+  
   shader(shader);
   rect(0, 0, width, height);
   
@@ -149,4 +181,21 @@ public void keyReleased()
 
   if(key == 's') saveFrame("Nebula.jpg");
  
+}
+
+public void procedural() {
+  println("The button value is: " + procedural);
+  if( procedural == 0.0 )
+  {
+    
+    procedural = 1;
+    
+  }
+  else if( procedural == 1 )
+  {
+  
+    procedural = 0;
+  
+  }
+  
 }

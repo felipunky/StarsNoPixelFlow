@@ -10,6 +10,8 @@ uniform float iTime;
 uniform float iRed;
 uniform float iGreen;
 uniform float iBlue;
+uniform float iDensity;
+uniform int iProcedural;
 uniform float iBackGroundRed;
 uniform float iBackGroundGreen;
 uniform float iBackGroundBlue;
@@ -19,7 +21,6 @@ uniform sampler2D iChannel1;
 #define STEPS       128
 #define FAR         10.
 #define PI acos( -1.0 )
-//#define PROCEDURAL
 #define HASHSCALE .1031
 
 mat2 rot( float a )
@@ -50,55 +51,53 @@ float hash(float p)
 }
 
 // iq's
-
-#ifdef PROCEDURAL
-
 float noise( in vec3 x )
 {
     
-    vec3 p = floor( x );
-    vec3 k = fract( x );
+    float res = 0.0;
     
-    k *= k * k * ( 3.0 - 2.0 * k );
+    if( iProcedural == 0 )
+    {
     
-    float n = p.x + p.y * 57.0 + p.z * 113.0;
+        vec3 p = floor( x );
+        vec3 k = fract( x );
+        
+        k *= k * k * ( 3.0 - 2.0 * k );
+        
+        float n = p.x + p.y * 57.0 + p.z * 113.0;
+        
+        float a = hash( n );
+        float b = hash( n + 1.0 );
+        float c = hash( n + 57.0 );
+        float d = hash( n + 58.0 );
+        
+        float e = hash( n + 113.0 );
+        float f = hash( n + 114.0 );
+        float g = hash( n + 170.0 );
+        float h = hash( n + 171.0 );
+        
+        res = mix( mix( mix ( a, b, k.x ), mix( c, d, k.x ), k.y ),
+                        mix( mix ( e, f, k.x ), mix( g, h, k.x ), k.y ),
+                        k.z
+                        );
     
-    float a = hash( n );
-    float b = hash( n + 1.0 );
-    float c = hash( n + 57.0 );
-    float d = hash( n + 58.0 );
-    
-    float e = hash( n + 113.0 );
-    float f = hash( n + 114.0 );
-    float g = hash( n + 170.0 );
-    float h = hash( n + 171.0 );
-    
-    float res = mix( mix( mix ( a, b, k.x ), mix( c, d, k.x ), k.y ),
-                    mix( mix ( e, f, k.x ), mix( g, h, k.x ), k.y ),
-                    k.z
-                    );
-    
+    }
+    else if( iProcedural == 1 )
+    {
+        
+        vec3 p = floor(x);
+        vec3 f = fract(x);
+        f = f*f*(3.0-2.0*f);
+        
+        vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
+        vec2 rg = textureLod( iChannel1, (uv+ 0.5)/256.0, 0.0 ).yx;
+        res = mix( rg.x, rg.y, f.z );
+        
+    }
+        
     return res;
     
 }
-
-#else
-
-float noise( in vec3 x )
-{
-    
-    
-    vec3 p = floor(x);
-    vec3 f = fract(x);
-    f = f*f*(3.0-2.0*f);
-    
-    vec2 uv = (p.xy+vec2(37.0,17.0)*p.z) + f.xy;
-    vec2 rg = textureLod( iChannel1, (uv+ 0.5)/256.0, 0.0 ).yx;
-    return mix( rg.x, rg.y, f.z );
-    
-}
-
-#endif
 
 float fbm( in vec3 p )
 {
@@ -165,6 +164,7 @@ vec3 shad( vec3 ro, vec3 rd, vec2 uv )
     
     float den = 0.0;
     float t = ray( ro, rd, den );
+    den += iDensity;
     
     vec3 p = ro + rd * t;
     
@@ -207,10 +207,13 @@ void main( )
      */
     vec3 ro = vec3( mou.x, mou.y, 2.5 );
     vec3 rd = normalize( vec3( uv, -1.0 ) );
-    /*ro.zy *= rot( -mou.y * 6.28 );
-     rd.zy *= rot( -mou.y * 6.28 );
-     ro.xy *= rot( mou.x * 6.28 );
-     rd.xy *= rot( mou.x * 6.28 );*/
+    /*
+    ro.zy *= rot( -mou.y * 6.28 );
+    rd.zy *= rot( -mou.y * 6.28 );
+    ro.xy *= rot( mou.x * 6.28 );
+    rd.xy *= rot( mou.x * 6.28 );
+    */
+    
     
     ro.zy *= rot( -iTime * 0.1 );
     rd.zy *= rot( -iTime * 0.1 );

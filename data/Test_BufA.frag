@@ -42,7 +42,6 @@ uniform sampler2D iChannel0;
 
 //#define SIMPLE
 
-
 float N21(vec2 p)
 {    // Dave Hoskins - https://www.shadertoy.com/view/4djSRW
     vec3 p3  = fract(vec3(p.xyx) * vec3(443.897, 441.423, 437.195));
@@ -123,7 +122,7 @@ void main( )
     
     //float fft  = texelFetch( iChannel2, ivec2(.7,0), 0 ).x;
     vec4 tex = texture( iChannel0, uv );
-    float glow = -length(uv)*0.1*quiiGlow+tex.w*iGlow;//+fft*0.05;
+    float glow = -length(uv)*0.1*iGlow+tex.w*iGlow;//+fft*0.05;
     
     vec3 baseCol = vec3(s, cos(t*.4), -sin(t*.24))*.4+.6;
     vec3 col = baseCol*m;
