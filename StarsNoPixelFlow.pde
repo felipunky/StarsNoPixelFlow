@@ -34,7 +34,7 @@ public void settings()
 public void setup() {
   
   noise = loadImage("Noise.png");
-  textureMode(IMAGE);
+  textureMode(NORMAL);
   pushMatrix(); 
   scale(1, -1); 
   translate(0, -noise.height);
