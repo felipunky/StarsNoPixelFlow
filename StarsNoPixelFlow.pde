@@ -16,21 +16,28 @@ float green_Colour = 0.0;
 float blue_Colour = 0.0;
 int number_of_stars = 4;
 float pulse = 10.0;
+float b_red = 0.0;
+float b_green = 0.0;
+float b_blue = 0.0;
 
 public void settings() 
 {
 
-  size(700, 350, P2D);
+  size(500, 281, P2D);
   smooth(0);
 
 }
 
 public void setup() {
   
+  pushMatrix();
+  //translate( 1, -1 );
+  translate( width, -height );
   noise = loadImage("Noise.png");
+  popMatrix();
   textureWrap(Texture.REPEAT);
   
-  float x = width*.7;
+  float x = width/height;
   
   Control = new ControlP5( this );  
   
@@ -67,7 +74,22 @@ public void setup() {
   Control.addSlider( "pulse" )
     .setPosition( x, 65 )
     .setRange( 0, 50 )
-    ;     
+    ;  
+    
+    Control.addSlider( "b_red" )
+    .setPosition( x, 75 )
+    .setRange( 0, 1 )
+    ;  
+    
+  Control.addSlider( "b_green" )
+    .setPosition( x, 85 )
+    .setRange( 0, 1 )
+    ;
+    
+  Control.addSlider( "b_blue" )
+    .setPosition( x, 95 )
+    .setRange( 0, 1 )
+    ;  
 
   bufA = loadShader("data/Test_BufA.frag");
   bufA.set("iResolution", (float)width, (float)height);
@@ -103,6 +125,9 @@ void draw()
   shader.set("iRed", red_Colour);
   shader.set("iGreen", green_Colour);
   shader.set("iBlue", blue_Colour);
+  shader.set("iBackGroundRed", b_red);
+  shader.set("iBackGroundGreen", b_green);
+  shader.set("iBackGroundBlue", b_blue);
   shader(shader);
   rect(0, 0, width, height);
   

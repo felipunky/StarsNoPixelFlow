@@ -10,6 +10,9 @@ uniform float iTime;
 uniform float iRed;
 uniform float iGreen;
 uniform float iBlue;
+uniform float iBackGroundRed;
+uniform float iBackGroundGreen;
+uniform float iBackGroundBlue;
 uniform sampler2D iChannel0;
 uniform sampler2D iChannel1;
 
@@ -165,12 +168,21 @@ vec3 shad( vec3 ro, vec3 rd, vec2 uv )
     
     vec3 p = ro + rd * t;
     
+    vec3 f = mix( vec3( 0.4 + iRed, fbm( p ) + iGreen, 0.2 + iBlue ),
+                  vec3( 0.9 + iRed, 0.9 + iGreen, 0.5 + iBlue ),
+                  fbm( p ) );
+    vec3 bac = vec3( iBackGroundRed, iBackGroundGreen, iBackGroundBlue );
+    
+    /*
     vec3 col = mix( vec3( 0 ),
                    mix( vec3( 0.4 + iRed, fbm( p ) + iGreen, 0.2 + iBlue ),
                         vec3( fbm( p ) + 0.9 + iRed, 0.9 + iGreen, 0.5 + iBlue ),
                         den
                        ), den * .5
                    );
+     */
+    
+    vec3 col = mix( bac, f, den );
     
     col *= sqrt( col );
     
