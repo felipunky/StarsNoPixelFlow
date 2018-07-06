@@ -7,11 +7,15 @@ precision mediump float;
 uniform vec2 iResolution;
 uniform vec2 iMouse;
 uniform float iTime;
+uniform float iZoom;
 uniform float iRed;
 uniform float iGreen;
 uniform float iBlue;
 uniform float iDensity;
+uniform int iNumberOfArms;
 uniform int iProcedural;
+uniform int iGalaxy;
+uniform int iFractal;
 uniform float iBackGroundRed;
 uniform float iBackGroundGreen;
 uniform float iBackGroundBlue;
@@ -21,6 +25,7 @@ uniform sampler2D iChannel1;
 #define STEPS       128
 #define FAR         10.
 #define PI acos( -1.0 )
+#define TPI    PI * 2.0
 #define HASHSCALE .1031
 
 mat2 rot( float a )
@@ -102,31 +107,65 @@ float noise( in vec3 x )
 float fbm( in vec3 p )
 {
     
-    //float wav = texture( iChannel2, vec2( 0.0, 0.25 ) ).x;
-    //float fre = texture( iChannel2, vec2( 0.0, 0.15 ) ).x;
+    if( iGalaxy == 0 )
+    {
+        
+        p.xy *= rot( iTime );
+        
+    }
+    
     float f = 0.0;
-    f += 0.5000 * noise( p ); p *= 2.02;// p -= iTime * 0.5 + wav;
-    f += 0.2500 * noise( p ); p *= 2.03;// p += iTime * 0.4 + fre;
-    f += 0.1250 * noise( p ); p *= 2.01;// p -= iTime * 0.5 + wav;
+    f += 0.5000 * noise( p ); p *= 2.02;
+    f += 0.2500 * noise( p ); p *= 2.03;
+    f += 0.1250 * noise( p ); p *= 2.01;
     f += 0.0625 * noise( p );
     f += 0.0125 * noise( p );
     return f / 0.9375;
     
 }
 
+// iapafoto's modded spiral
+float spiral( in vec3 p )
+{
+    
+    float a = atan(p.y,p.x)+iTime;
+    float r = length(p.xy);
+    float lr = 2.0 * log(r);
+    float th = 0.05 - 0.4 * r; // thickness according to distance
+    float d = fract( 0.5 * ( a - lr * 1.0 ) / PI ); //apply rotation and scaling.
+    float phase = float( iNumberOfArms ) * ( a - lr );
+    
+    d = cos( phase );
+    
+    d = ( 0.1 - abs( d - 0.1 ) ) * 2.0 * PI * r / 32.0;
+    
+    return sqrt( d * d + p.z * p.z ) - th * r;
+    
+}
+
 float map( vec3 p )
 {
     
-    //return p.y + 1.0 * fbm( p + iTime * 0.2 );
-    //float f = 1.7 - length( p ) * fbm( p );
+    if( iFractal == 0 )
+    {
+        
+        for( float i = 0.; i < 0.5; i+=0.1 )
+        {
+            
+            p = abs( p - vec3( 0.1 ) ) - 0.1;
+            p.xy *= rot( iTime * 0.05 );
+            p.xz *= rot( iTime * 0.05 );
+            p.zy *= rot( iTime * 0.05 );
+            
+        }
+        
+    }
     
-    //p.zy *= rot( iTime * 0.1 );
-    
-    p.z -= iTime * 0.5;
+    float fO = ( 1.5 + iDensity ) - spiral( p ) + fbm( p ) * 0.3;
     
     float f = fbm( p );
     
-    return f;
+    return mix( fO, f, iGalaxy );
     
 }
 
@@ -140,16 +179,28 @@ float ray( vec3 ro, vec3 rd, out float den )
         
         vec3 p = ro + rd * t;
         
-        den = d * ( map( p ) * t * t * 0.025 );
-        //den = map( p );
+        if( iGalaxy == 1 )
+        {
+        
+            den = d * ( map( p ) * t * t * 0.025 );
+        
+        }
+        
+        if( iGalaxy == 0 )
+        {
+            
+            den = 0.3 * map( p );
+            
+        }
+        
         maxD = maxD < den ? den : maxD;
         
         if( maxD > 1.0 || t > FAR ) break;
         
         // https://www.shadertoy.com/view/MscXRH
-        t += max( maxD*.1, .05 );
+        //t += max( maxD*.1, .05 );
         
-        //t += 0.05;
+        t += 0.05;
         
     }
     
@@ -164,25 +215,36 @@ vec3 shad( vec3 ro, vec3 rd, vec2 uv )
     
     float den = 0.0;
     float t = ray( ro, rd, den );
-    den += iDensity;
+    vec3 col = vec3( 0 );
+    vec3 bac = vec3( iBackGroundRed, iBackGroundGreen, iBackGroundBlue );
+    vec3 f = vec3( 0 );
     
     vec3 p = ro + rd * t;
     
-    vec3 f = mix( vec3( 0.4 + iRed, fbm( p ) + iGreen, 0.2 + iBlue ),
-                  vec3( 0.9 + iRed, 0.9 + iGreen, 0.5 + iBlue ),
-                  fbm( p ) );
-    vec3 bac = vec3( iBackGroundRed, iBackGroundGreen, iBackGroundBlue );
+    if( iGalaxy == 1 )
+    {
     
-    /*
-    vec3 col = mix( vec3( 0 ),
-                   mix( vec3( 0.4 + iRed, fbm( p ) + iGreen, 0.2 + iBlue ),
-                        vec3( fbm( p ) + 0.9 + iRed, 0.9 + iGreen, 0.5 + iBlue ),
-                        den
-                       ), den * .5
-                   );
-     */
+        den += iDensity;
+        
+        f = mix( vec3( 0.4 + iRed, fbm( p ) + iGreen, 0.2 + iBlue ),
+                 vec3( 0.9, 0.9 + iGreen, 0.5 + iBlue ),
+                 fbm( p )
+                );
+        
+        col = mix( bac, f, den );
+        
+    }
     
-    vec3 col = mix( bac, f, den );
+    else if( iGalaxy == 0 )
+    {
+        
+        col = mix( bac,
+                   mix( vec3( 0.4 + iRed, 0.1 + iGreen, 0.2 + iBlue ),
+                        vec3( 0.9 + iRed, 0.9 + iGreen, 0.5 + iBlue ),
+                        den ),
+                   den * 4.0 + iDensity );
+        
+    }
     
     col *= sqrt( col );
     
@@ -198,28 +260,33 @@ void main( )
     
     vec2 mou = iMouse.xy / iResolution.xy;
     
-    /*
-     vec3 ro = 3.0 * vec3( sin( mou.x * 2.0 * PI ), 0.0, cos( -mou.x * 2.0 * PI ) );
-     vec3 ww = normalize( vec3( 0 ) - ro );
-     vec3 uu = normalize( cross( vec3( 0, 1, 0 ), ww ) );
-     vec3 vv = normalize( cross( ww, uu ) );
-     vec3 rd = normalize( uv.x * uu + uv.y * vv + 1.5 * ww );
-     */
-    vec3 ro = vec3( mou.x, mou.y, 2.5 );
-    vec3 rd = normalize( vec3( uv, -1.0 ) );
-    /*
-    ro.zy *= rot( -mou.y * 6.28 );
-    rd.zy *= rot( -mou.y * 6.28 );
-    ro.xy *= rot( mou.x * 6.28 );
-    rd.xy *= rot( mou.x * 6.28 );
-    */
+    vec3 ro = vec3( 0 );
+    vec3 rd = vec3( 0 );
     
+    if( iGalaxy == 1 )
+    {
+        
+        ro = vec3( mou.x, mou.y, 2.5 - iZoom );
+        rd = normalize( vec3( uv, -1.0 ) );
+        ro.zy *= rot( -iTime * 0.1 );
+        rd.zy *= rot( -iTime * 0.1 );
+        ro.xy *= rot( -iTime * 0.1 );
+        rd.xy *= rot( -iTime * 0.1 );
     
-    ro.zy *= rot( -iTime * 0.1 );
-    rd.zy *= rot( -iTime * 0.1 );
-    ro.xy *= rot( -iTime * 0.1 );
-    rd.xy *= rot( -iTime * 0.1 );
+    }
     
+    if( iGalaxy == 0 )
+    {
+        
+        ro = vec3( 0, 0, 2.5 - iZoom );
+        rd = normalize( vec3( uv, -1.0 ) );
+        ro.zy *= rot( mou.y * TPI );
+        rd.zy *= rot( mou.y * TPI );
+        ro.xy *= rot( mou.x * TPI );
+        rd.xy *= rot( mou.x * TPI );
+        
+    }
+        
     float den = 0.0, t = ray( ro, rd, den );
     
     vec3 poi = ro + rd * t;

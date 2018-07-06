@@ -15,18 +15,23 @@ float red_Colour = 0.0;
 float green_Colour = 0.0;
 float blue_Colour = 0.0;
 int number_of_stars = 4;
+int number_of_arms = 3;
 float pulse = 10.0;
 float b_red = 0.0;
 float b_green = 0.0;
 float b_blue = 0.0;
 float density = 0.0;
+float zoom = 0.0;
 
 int procedural = 0;
+int galaxy = 0;
+int fractal = 0;
 
 public void settings() 
 {
 
   size(500, 281, P2D);
+  //size(800, 450, P2D);
   smooth(0);
 
 }
@@ -45,64 +50,89 @@ public void setup() {
   float x = width/height;
   
   Control = new ControlP5( this );  
+
+  Control.addSlider( "zoom" )
+    .setPosition( x, 5 )
+    .setRange( -2, 2 )
+    ;  
   
   Control.addSlider( "Mouse_Rate" )
-    .setPosition( x, 5 )
-    .setRange( 0, 1 );
+    .setPosition( x, 15 )
+    .setRange( 0, 1 )
+    ;
     
   Control.addSlider( "glow" )
-    .setPosition( x, 15 )
-    .setRange( 0, 1 );
+    .setPosition( x, 25 )
+    .setRange( 0, 1 )
+    ;
     
   Control.addSlider( "red_Colour" )
-    .setPosition( x, 25 )
+    .setPosition( x, 35 )
     .setRange( 0, 1 )
     ;  
     
   Control.addSlider( "green_Colour" )
-    .setPosition( x, 35 )
-    .setRange( 0, 1 )
-    ;
-    
-  Control.addSlider( "blue_Colour" )
     .setPosition( x, 45 )
     .setRange( 0, 1 )
     ;
     
-  Control.addSlider( "number_of_stars" )
+  Control.addSlider( "blue_Colour" )
     .setPosition( x, 55 )
+    .setRange( 0, 1 )
+    ;
+    
+  Control.addSlider( "number_of_stars" )
+    .setPosition( x, 65 )
     .setRange( 0, 10 )
     .setNumberOfTickMarks(10);
     ;  
     
   Control.addSlider( "pulse" )
-    .setPosition( x, 65 )
+    .setPosition( x, 75 )
     .setRange( 0, 50 )
     ;  
     
     Control.addSlider( "b_red" )
-    .setPosition( x, 75 )
+    .setPosition( x, 85 )
     .setRange( 0, 1 )
     ;  
     
   Control.addSlider( "b_green" )
-    .setPosition( x, 85 )
+    .setPosition( x, 95 )
     .setRange( 0, 1 )
     ;
     
   Control.addSlider( "b_blue" )
-    .setPosition( x, 95 )
+    .setPosition( x, 105 )
     .setRange( 0, 1 )
     ; 
     
   Control.addSlider( "density" )
-    .setPosition( x, 105 )
+    .setPosition( x, 115 )
     .setRange( 0, 1 )
-    ;     
+    ;        
     
   Control.addButton( "procedural" )
     .setValue( 0 )
-    .setPosition( x, 115 )
+    .setPosition( x, 125 )
+    .setSize( 100, 10 )
+    ;  
+    
+  Control.addButton( "galaxy" )
+    .setValue( 0 )
+    .setPosition( x, 135 )
+    .setSize( 100, 10 )
+    ;
+    
+  Control.addSlider( "number_of_arms" )
+    .setPosition( x, 145 )
+    .setRange( 0, 10 )
+    .setNumberOfTickMarks(10);
+    ;   
+    
+  Control.addButton( "fractal" )
+    .setValue( 0 )
+    .setPosition( x, 155 )
     .setSize( 100, 10 )
     ;  
 
@@ -115,9 +145,6 @@ public void setup() {
 }
 void draw() 
 {
-  
-  fill(255);
-  rect(0, 0, width, height);
   
   bufA.set("iChannel0", get());
   bufA.set("iTime", millis() / 1000.0);
@@ -144,6 +171,7 @@ void draw()
   shader.set("iChannel1", noise);
   shader.set("iMouse", rotX, rotY);
   shader.set("iTime", millis() / 1000.0);
+  shader.set("iZoom", zoom);
   shader.set("iRed", red_Colour);
   shader.set("iGreen", green_Colour);
   shader.set("iBlue", blue_Colour);
@@ -152,6 +180,9 @@ void draw()
   shader.set("iBackGroundBlue", b_blue);
   shader.set("iDensity", density);
   shader.set("iProcedural", procedural);
+  shader.set("iGalaxy", galaxy);
+  shader.set("iFractal", fractal);
+  shader.set("iNumberOfArms", number_of_arms);
   
   if( keyPressed )
   {
@@ -195,6 +226,40 @@ public void procedural() {
   {
   
     procedural = 0;
+  
+  }
+  
+}
+
+public void galaxy() {
+  println("The button value is: " + galaxy);
+  if( galaxy == 0 )
+  {
+    
+    galaxy = 1;
+    
+  }
+  else if( galaxy == 1 )
+  {
+  
+    galaxy = 0;
+  
+  }
+  
+}
+
+public void fractal() {
+  println("The button value is: " + fractal);
+  if( fractal == 0 )
+  {
+    
+    fractal = 1;
+    
+  }
+  else if( fractal == 1 )
+  {
+  
+    fractal = 0;
   
   }
   
