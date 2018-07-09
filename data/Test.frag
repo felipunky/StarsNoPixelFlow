@@ -144,7 +144,7 @@ float spiral( in vec3 p )
     
 }
 
-float sinNoise( in vec3 p )
+float fbmOne( in vec3 p )
 {
     
     float f = 0.0;
@@ -195,7 +195,7 @@ float map( vec3 p )
     if( iNoise == 0 )
     {
     
-        f = sinNoise( p ) + 0.3;
+        f = fbmOne( p ) + 0.3;
     
     }
     
