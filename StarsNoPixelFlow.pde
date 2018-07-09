@@ -24,6 +24,7 @@ float density = 0.0;
 float zoom = 0.0;
 
 int procedural = 0;
+int noise_field = 0;
 int galaxy = 0;
 int fractal = 0;
 
@@ -116,23 +117,29 @@ public void setup() {
     .setValue( 0 )
     .setPosition( x, 125 )
     .setSize( 100, 10 )
-    ;  
+    ; 
+    
+  Control.addButton( "noise_field" )
+    .setValue( 0 )
+    .setPosition( x, 135 )
+    .setSize( 100, 10 )
+    ;     
     
   Control.addButton( "galaxy" )
     .setValue( 0 )
-    .setPosition( x, 135 )
+    .setPosition( x, 145 )
     .setSize( 100, 10 )
     ;
     
   Control.addSlider( "number_of_arms" )
-    .setPosition( x, 145 )
+    .setPosition( x, 155 )
     .setRange( 0, 10 )
     .setNumberOfTickMarks(10);
     ;   
     
   Control.addButton( "fractal" )
     .setValue( 0 )
-    .setPosition( x, 155 )
+    .setPosition( x, 165 )
     .setSize( 100, 10 )
     ;  
 
@@ -180,6 +187,7 @@ void draw()
   shader.set("iBackGroundBlue", b_blue);
   shader.set("iDensity", density);
   shader.set("iProcedural", procedural);
+  shader.set("iNoise", noise_field);
   shader.set("iGalaxy", galaxy);
   shader.set("iFractal", fractal);
   shader.set("iNumberOfArms", number_of_arms);
@@ -243,6 +251,23 @@ public void galaxy() {
   {
   
     galaxy = 0;
+  
+  }
+  
+}
+
+public void noise_field() {
+  println("The button value is: " + noise_field);
+  if( noise_field == 0 )
+  {
+    
+    noise_field = 1;
+    
+  }
+  else if( noise_field == 1 )
+  {
+  
+    noise_field = 0;
   
   }
   

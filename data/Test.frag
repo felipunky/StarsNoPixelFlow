@@ -14,6 +14,7 @@ uniform float iBlue;
 uniform float iDensity;
 uniform int iNumberOfArms;
 uniform int iProcedural;
+uniform int iNoise;
 uniform int iGalaxy;
 uniform int iFractal;
 uniform float iBackGroundRed;
@@ -143,6 +144,33 @@ float spiral( in vec3 p )
     
 }
 
+float sinNoise( in vec3 p )
+{
+    
+    float f = 0.0;
+
+    float amp = 0.3;
+
+    float fre = 0.7;
+
+    int iter = 10;
+
+    for( int i = 0; i < iter; ++i )
+    {
+        
+        f += amp * ( noise( p * fre ) );
+        
+        if( iter < i ) break;
+        
+        amp *= 0.5;
+        fre *= 0.5;
+        
+    }
+
+    return f;
+    
+}
+
 float map( vec3 p )
 {
     
@@ -161,9 +189,24 @@ float map( vec3 p )
         
     }
     
-    float fO = ( 1.5 + iDensity ) - spiral( p ) + fbm( p ) * 0.3;
+    float f = 0.0;
+    float fO = 0.0;
     
-    float f = fbm( p );
+    if( iNoise == 0 )
+    {
+    
+        f = sinNoise( p ) + 0.3;
+    
+    }
+    
+    else if( iNoise == 1 )
+    {
+        
+        f = fbm( p );
+        
+    }
+    
+    fO = ( 1.5 + iDensity ) - spiral( p ) + fbm( p ) * 0.3;
     
     return mix( fO, f, iGalaxy );
     
