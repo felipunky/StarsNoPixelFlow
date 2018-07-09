@@ -153,7 +153,7 @@ float fbmOne( in vec3 p )
 
     float fre = 0.7;
 
-    int iter = 10;
+    int iter = 4;
 
     for( int i = 0; i < iter; ++i )
     {
