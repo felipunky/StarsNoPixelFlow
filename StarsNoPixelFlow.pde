@@ -31,7 +31,7 @@ int fractal = 0;
 public void settings() 
 {
 
-  size(500, 281, P2D);
+  size(displayWidth, displayHeight, P3D);
   //size(800, 450, P2D);
   smooth(0);
 
